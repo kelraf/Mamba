@@ -66,7 +66,7 @@ defmodule Mamba.DataStoreManager do
 
     end
 
-    defp matchStoredData({{baseAsset1, quoteAsset1}, {baseAsset2, quoteAsset2}, {baseAsset3, quoteAsset3}} = symbols) do
+    defp matchStoredData({{baseAsset1, quoteAsset1}, {baseAsset2, quoteAsset2}, {baseAsset3, quoteAsset3}} = _symbols) do
 
         %{"top_data" => top_data, "middle_data" => middle_data, "bottom_data" => bottom_data} = DataStore.get_all
 

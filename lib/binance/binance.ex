@@ -40,6 +40,7 @@ defmodule Mamba.Binance do
                 |> Map.put("baseAsset", baseAsset)
                 |> Map.put("quoteAsset", quoteAsset)
                 |> DataStore.put("top_data") 
+                calcArb()
                 # IO.inspect %{"symbols" => event["stream"], "data_level" => "Top Data"}
 
             event["stream"] == DataStore.get("middle_data")["stream"] -> 
@@ -52,6 +53,7 @@ defmodule Mamba.Binance do
                 |> Map.put("baseAsset", baseAsset)
                 |> Map.put("quoteAsset", quoteAsset)
                 |> DataStore.put("middle_data")
+                calcArb()
                 # IO.inspect %{"symbols" => event["stream"], "data_level" => "Middle Data"}
 
             event["stream"] == DataStore.get("bottom_data")["stream"] -> 
@@ -64,10 +66,59 @@ defmodule Mamba.Binance do
                 |> Map.put("baseAsset", baseAsset)
                 |> Map.put("quoteAsset", quoteAsset)
                 |> DataStore.put("bottom_data")
+                calcArb()
                 # IO.inspect %{"symbols" => event["stream"], "data_level" => "Bottom Data"}
 
         end
 
     end
 
+    defp calcArb() do
+        
+        %{"top_data" => top_data, "middle_data" => middle_data, "bottom_data" => bottom_data} = DataStore.get_all
+        what_i_have = "ltc"
+        top_data_results = calcOne(top_data, what_i_have)
+        middle_data_results = calcOne(middle_data, top_data_results["new_what_i_have"])
+        bottom_data_results = calcOne(bottom_data, middle_data_results["new_what_i_have"])
+
+        profit = top_data_results["calcResults"] * middle_data_results["calcResults"] * bottom_data_results["calcResults"] 
+
+        IO.inspect(%{
+            "top_data_results" => top_data_results["calcResults"], 
+            "middle_data_results" => middle_data_results["calcResults"],
+            "bottom_data_results" => bottom_data_results["calcResults"], 
+            "profit" => "#{profit}%"
+        })
+
+    end
+
+    defp calcOne(%{"baseAsset" => baseAsset,
+        "data" => %{
+            "A" => _ask_quantity,
+            "B" => _bid_quantity, 
+            "a" => ask_price,
+            "b" => bid_price,
+            "s" => _symbol,
+            "u" => _order_book_update_id
+        },
+        "quoteAsset" => quoteAsset,
+        "stream" => _stream}, what_i_have) do
+
+        cond do
+            what_i_have == baseAsset ->
+                {bid_price, _} = Float.parse(bid_price)
+                %{"calcResults" => bid_price, "new_what_i_have" => quoteAsset}
+                # {calcResults, new_what_i_have}
+            what_i_have == quoteAsset ->
+                {ask_price, _} = Float.parse(ask_price)
+                %{"calcResults" => 1/ask_price, "new_what_i_have" => baseAsset}
+                # {calcResults, new_what_i_have}
+                
+        end
+        
+    end
+
   end
+
+#   {:ok, pid} = Binance.start_link {{"btc", "usdt"}, {"bnb", "btc"}, {"bnb", "usdt"}}, []
+#   {:ok, pid} = Binance.start_link {{"ltc", "btc"}, {"bnb", "btc"}, {"ltc", "bnb"}}, []
