@@ -14,9 +14,12 @@ defmodule Mamba.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Mamba.PubSub},
       # Start the Endpoint (http/https)
-      MambaWeb.Endpoint
+      MambaWeb.Endpoint,
       # Start a worker by calling: Mamba.Worker.start_link(arg)
       # {Mamba.Worker, arg}
+
+      # DataStore
+      {Mamba.DataStore, Mamba.DataStoreManager.mapStructure}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
