@@ -76,7 +76,7 @@ defmodule Mamba.Binance do
     defp calcArb() do
         
         %{"top_data" => top_data, "middle_data" => middle_data, "bottom_data" => bottom_data} = DataStore.get_all
-        what_i_have = "ltc"
+        what_i_have = "usdt"
         top_data_results = calcOne(top_data, what_i_have)
         middle_data_results = calcOne(middle_data, top_data_results["new_what_i_have"])
         bottom_data_results = calcOne(bottom_data, middle_data_results["new_what_i_have"])
@@ -84,9 +84,9 @@ defmodule Mamba.Binance do
         profit = top_data_results["calcResults"] * middle_data_results["calcResults"] * bottom_data_results["calcResults"] 
 
         IO.inspect(%{
-            "top_data_results" => top_data_results["calcResults"], 
-            "middle_data_results" => middle_data_results["calcResults"],
-            "bottom_data_results" => bottom_data_results["calcResults"], 
+            "top_data_results" => %{"calcResults" => top_data_results["calcResults"], "top_data" => top_data},
+            "middle_data_results" => %{"calcResults" => middle_data_results["calcResults"], "middle_data" => middle_data},
+            "bottom_data_results" => %{"calcResults" => bottom_data_results["calcResults"], "bottom_data" => bottom_data},
             "profit" => "#{profit}%"
         })
 
@@ -113,7 +113,7 @@ defmodule Mamba.Binance do
                 {ask_price, _} = Float.parse(ask_price)
                 %{"calcResults" => 1/ask_price, "new_what_i_have" => baseAsset}
                 # {calcResults, new_what_i_have}
-                
+            true -> # Do Nothing
         end
         
     end
@@ -121,4 +121,60 @@ defmodule Mamba.Binance do
   end
 
 #   {:ok, pid} = Binance.start_link {{"btc", "usdt"}, {"bnb", "btc"}, {"bnb", "usdt"}}, []
+#   {:ok, pid} = Binance.start_link {{"eth", "usdt"}, {"bnb", "eth"}, {"bnb", "usdt"}}, []
+#   {:ok, pid} = Binance.start_link {{"usdt", "dai"}, {"bnb", "dai"}, {"bnb", "usdt"}}, []
+#   {:ok, pid} = Binance.start_link {{"bnb", "usdt"}, {"bnb", "btc"}, {"btc", "usdt"}}, []
 #   {:ok, pid} = Binance.start_link {{"ltc", "btc"}, {"bnb", "btc"}, {"ltc", "bnb"}}, []
+
+x = %{                             
+    "bottom_data_results" => %{
+      "bottom_data" => %{
+        "baseAsset" => "bnb",
+        "data" => %{
+          "A" => "3.03300000",
+          "B" => "9.61000000",
+          "a" => "255.90800000",
+          "b" => "255.88940000",
+          "s" => "BNBUSDT",
+          "u" => 3148018662
+        },
+        "quoteAsset" => "usdt",
+        "stream" => "bnbusdt@bookTicker"
+      },
+      "calcResults" => 255.8894
+    },
+    "middle_data_results" => %{
+      "calcResults" => 217.90290246666086,
+      "middle_data" => %{
+        "baseAsset" => "bnb",
+        "data" => %{
+          "A" => "7.39000000",
+          "B" => "3.95000000",
+          "a" => "0.00458920",
+          "b" => "0.00458870",
+          "s" => "BNBBTC",
+          "u" => 1516125238
+        },
+        "quoteAsset" => "btc",
+        "stream" => "bnbbtc@bookTicker"
+      }
+    },
+    "profit" => "0.9998983760599196%",
+    "top_data_results" => %{
+      "calcResults" => 1.7932488127347923e-5,
+      "top_data" => %{
+        "baseAsset" => "btc",
+        "data" => %{
+          "A" => "2.42045700",
+          "B" => "0.35441900",
+          "a" => "55764.71000000",
+          "b" => "55764.70000000",
+          "s" => "BTCUSDT",
+          "u" => 9542094364
+        },
+        "quoteAsset" => "usdt",
+        "stream" => "btcusdt@bookTicker"
+      }
+    }
+  }
+  
